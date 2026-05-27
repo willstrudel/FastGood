@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fast Good — Hosting Options</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0f1117;
+      --surface:    #1a1d24;
+      --surface-2:  #22262f;
+      --border:     #2a2d36;
+      --text:       #e8eaf0;
+      --text-muted: #7b8099;
+      --accent:     #f59e0b;
+      --success:    #10b981;
+      --purple:     #a78bfa;
+      --danger:     #ef4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px 80px;
+      max-width: 780px;
+      margin: 0 auto;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header { margin-bottom: 48px; }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--purple);
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    section { margin-bottom: 40px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-header h2 { margin-bottom: 0; }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .badge.current  { background: rgba(167,139,250,.15); color: var(--purple);  border: 1px solid rgba(167,139,250,.3); }
+    .badge.easy     { background: rgba(16,185,129,.12);  color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+    .badge.private  { background: rgba(245,158,11,.12);  color: var(--accent);  border: 1px solid rgba(245,158,11,.3); }
+    .badge.advanced { background: rgba(239,68,68,.1);    color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
+
+    p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+
+    ol, ul {
+      padding-left: 20px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    li { margin-bottom: 8px; }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 0.85em;
+      color: var(--accent);
+    }
+
+    pre {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.7;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    .key-fact {
+      background: rgba(167,139,250,.08);
+      border: 1px solid rgba(167,139,250,.2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: var(--purple);
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+
+    th {
+      text-align: left;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    td:first-child { color: var(--text); font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+
+    a { color: var(--purple); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Fast Good — Hosting Options</h1>
+    <p>Reference doc for hosting the app and switching providers. Data always lives in your browser's localStorage — independent of where the app is hosted.</p>
+  </header>
+
+  <!-- Key facts -->
+  <section>
+    <h3>Key Facts</h3>
+    <div class="key-fact">Your fasting data (history, active fast, settings) is stored in <code>localStorage</code> in your browser. No server ever sees it.</div>
+    <div class="key-fact">The service worker caches all app files after the first load. Once cached, the app works completely offline.</div>
+    <div class="key-fact">Switching hosting providers has zero effect on your data. You can move anytime.</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Comparison -->
+  <section>
+    <h3>Options at a Glance</h3>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>Effort</th>
+            <th>Stays Private</th>
+            <th>Works Offline</th>
+            <th>Requires 24/7 PC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GitHub Pages</td>
+            <td>~5 min</td>
+            <td>Files public, data private</td>
+            <td>Yes (after first load)</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Tailscale</td>
+            <td>~15 min</td>
+            <td>Fully private</td>
+            <td>Yes (after first load)</td>
+            <td>Yes (or home lab server)</td>
+          </tr>
+          <tr>
+            <td>Cloudflare Tunnel</td>
+            <td>~20 min</td>
+            <td>Fully private</td>
+            <td>Yes (after first load)</td>
+            <td>Yes (or home lab server)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- GitHub Pages -->
+  <section>
+    <div class="card">
+      <div class="card-header">
+        <h2>Option 1 — GitHub Pages</h2>
+        <div>
+          <span class="badge current">Current</span>
+          &nbsp;
+          <span class="badge easy">Easiest</span>
+        </div>
+      </div>
+      <p>GitHub hosts your static files for free over HTTPS. Your fasting data never touches GitHub — only the app code (HTML, CSS, JS) is public.</p>
+
+      <h3 style="margin-top:20px">Setup Steps</h3>
+      <ol>
+        <li>Create a new GitHub repo (e.g. <code>fast-good</code>). Can be public or private.</li>
+        <li>Push the contents of <code>projects/fasting-app/</code> to the repo root:
+          <pre>cd C:\Users\Will\magi\projects\fasting-app
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USERNAME/fast-good.git
+git push -u origin main</pre>
+        </li>
+        <li>In the repo on GitHub: <strong>Settings → Pages → Branch: main → Save</strong>.</li>
+        <li>Your app is live at <code>https://YOUR_USERNAME.github.io/fast-good/</code> within ~60 seconds.</li>
+        <li>Open that URL on your phone, then use <strong>Share → Add to Home Screen</strong> (iOS) or the install prompt (Android) to install the PWA.</li>
+      </ol>
+
+      <h3 style="margin-top:20px">Updating the App</h3>
+      <p>After any code change, commit and push. GitHub Pages redeploys automatically. Bump the cache version in <code>sw.js</code> (<code>fast-v11</code> → <code>fast-v12</code>, etc.) and hard-refresh on each device to pull the new version.</p>
+
+      <h3 style="margin-top:20px">Switching Away Later</h3>
+      <p>Just stop using the GitHub Pages URL. Export your data from Settings → Export JSON, then import it on the new host. Or just let localStorage persist if you're using the same browser.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Tailscale -->
+  <section>
+    <div class="card">
+      <div class="card-header">
+        <h2>Option 2 — Tailscale</h2>
+        <span class="badge private">Most Private</span>
+      </div>
+      <p>Tailscale creates a mesh VPN between your devices. Your phone can reach your home PC (or a home lab server) from anywhere as if it's on the same LAN. No port forwarding, no public exposure.</p>
+
+      <h3 style="margin-top:20px">Setup Steps</h3>
+      <ol>
+        <li>Install Tailscale on your PC: <a href="https://tailscale.com/download" target="_blank">tailscale.com/download</a></li>
+        <li>Install Tailscale on your phone (iOS App Store / Google Play).</li>
+        <li>Sign in to the same Tailscale account on both devices.</li>
+        <li>Serve the app from your PC or home lab server:
+          <pre>cd C:\Users\Will\magi\projects\fasting-app
+python -m http.server 8080</pre>
+        </li>
+        <li>On your phone (with Tailscale active), open <code>http://YOUR_PC_TAILSCALE_IP:8080</code>. Find the IP in the Tailscale admin console or app.</li>
+        <li>Install as PWA from that URL. Once cached, it works offline even when Tailscale is off.</li>
+      </ol>
+
+      <h3 style="margin-top:20px">Home Lab Upgrade Path</h3>
+      <p>Move the file server from your PC to a home lab machine that stays on 24/7 (e.g. a Proxmox VM or LXC container running nginx). This means the app is always reachable regardless of whether your PC is on. A good Ansible playbook target.</p>
+
+      <h3 style="margin-top:20px">Note on HTTPS</h3>
+      <p>Tailscale provides HTTPS via its <strong>MagicDNS + HTTPS certificates</strong> feature. Enable it in the Tailscale admin console under DNS settings, then use <code>https://your-machine-name.tail....ts.net:8080</code> (or configure nginx to terminate TLS). Required for the PWA install prompt on Android Chrome.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Cloudflare Tunnel -->
+  <section>
+    <div class="card">
+      <div class="card-header">
+        <h2>Option 3 — Cloudflare Tunnel</h2>
+        <span class="badge advanced">Home Lab</span>
+      </div>
+      <p>Cloudflare Tunnel exposes a local service to the internet via an encrypted outbound tunnel — no port forwarding, no public IP needed. You get a real HTTPS URL. Free tier is sufficient.</p>
+
+      <h3 style="margin-top:20px">Setup Steps</h3>
+      <ol>
+        <li>Create a free Cloudflare account and add a domain (or use a free <code>*.trycloudflare.com</code> URL for testing).</li>
+        <li>Install <code>cloudflared</code> on your home lab server.</li>
+        <li>Authenticate: <pre>cloudflared tunnel login</pre></li>
+        <li>Create a tunnel:
+          <pre>cloudflared tunnel create fast-good</pre>
+        </li>
+        <li>Configure it to point at your local file server (e.g. <code>http://localhost:8080</code>) and run it.</li>
+        <li>Your app is available at <code>https://fast-good.yourdomain.com</code> from anywhere.</li>
+      </ol>
+
+      <h3 style="margin-top:20px">When to Use This Over Tailscale</h3>
+      <p>Tailscale is simpler for personal use. Cloudflare Tunnel makes more sense if you want to share the app URL with someone else, or if you're already running Cloudflare for other home lab services.</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- App config reference -->
+  <section>
+    <h3>App Config Reference</h3>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Value / Location</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>App name</td><td>Fast Good</td></tr>
+          <tr><td>Source files</td><td><code>C:\Users\Will\magi\projects\fasting-app\</code></td></tr>
+          <tr><td>Key files</td><td><code>index.html</code>, <code>app.css</code>, <code>app.js</code>, <code>sw.js</code>, <code>manifest.json</code>, <code>icon.svg</code></td></tr>
+          <tr><td>Service worker cache key</td><td><code>fast-v11</code> in <code>sw.js</code> — bump this on every deploy</td></tr>
+          <tr><td>Data storage</td><td>Browser <code>localStorage</code> — keys: <code>fast_active</code>, <code>fast_history</code>, <code>fast_settings</code></td></tr>
+          <tr><td>Export / import</td><td>Settings → Export data as JSON / Import from JSON</td></tr>
+          <tr><td>Local dev server</td><td><code>python -m http.server 8080</code> from the app directory</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</body>
+</html>

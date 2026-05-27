@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fast Good">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <title>Fast Good</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Timer View -->
+    <div id="view-timer" class="view active">
+      <header class="view-header">
+        <h1>Fast Good</h1>
+        <span id="fast-status" class="status-badge">Not fasting</span>
+      </header>
+      <main class="timer-main">
+        <div class="ring-container">
+          <svg class="ring" viewBox="0 0 260 260" aria-hidden="true">
+            <circle class="ring-track" cx="130" cy="130" r="110"/>
+            <circle id="ring-progress" class="ring-progress" cx="130" cy="130" r="110"
+                    transform="rotate(-90 130 130)"/>
+          </svg>
+          <div class="ring-center">
+            <div id="elapsed-time" class="elapsed-time">00:00:00</div>
+            <div class="time-label">elapsed</div>
+          </div>
+        </div>
+
+        <div id="goal-info" class="goal-info hidden">
+          <button id="goal-label" class="goal-pill" title="Tap to change goal">Goal: 16h &#9998;</button>
+          <span id="time-remaining"></span>
+        </div>
+
+        <button id="fast-toggle" class="fast-btn">Start Fast</button>
+        <button id="backdate-btn" class="backdate-link">Started earlier?</button>
+
+        <div id="fast-since" class="fast-since hidden"></div>
+      </main>
+    </div>
+
+    <!-- History View -->
+    <div id="view-history" class="view">
+      <header class="view-header">
+        <h1>History</h1>
+      </header>
+      <main class="history-main">
+        <div id="history-list" class="history-list"></div>
+        <div id="history-empty" class="empty-state hidden">
+          <p>No fasts recorded yet.</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Stats View -->
+    <div id="view-stats" class="view">
+      <header class="view-header">
+        <h1>Stats</h1>
+      </header>
+      <main class="stats-main">
+        <div id="stats-grid" class="stats-grid"></div>
+        <div id="stats-empty" class="empty-state hidden">
+          <p>Complete a fast to see stats.</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Settings View -->
+    <div id="view-settings" class="view">
+      <header class="view-header">
+        <h1>Settings</h1>
+      </header>
+      <main class="settings-main">
+        <section class="settings-section">
+          <h2>Default Goal (new fasts)</h2>
+          <div id="goal-presets" class="goal-presets"></div>
+          <div class="custom-goal">
+            <label for="custom-hours">Custom</label>
+            <input type="number" id="custom-hours" min="1" max="168" placeholder="hours">
+            <button id="custom-goal-btn" class="preset-btn">Set</button>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h2>Data</h2>
+          <button id="export-btn" class="settings-btn">Export data as JSON</button>
+          <button id="import-btn" class="settings-btn">Import from JSON</button>
+          <input type="file" id="import-file" accept=".json" class="hidden">
+        </section>
+
+        <section class="settings-section">
+          <h2 class="danger-heading">Danger Zone</h2>
+          <button id="clear-btn" class="settings-btn danger">Clear all data</button>
+        </section>
+      </main>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="timer" aria-label="Timer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Timer</span>
+    </button>
+    <button class="nav-btn" data-view="history" aria-label="History">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <line x1="10" y1="9" x2="8" y2="9"/>
+      </svg>
+      <span>History</span>
+    </button>
+    <button class="nav-btn" data-view="stats" aria-label="Stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      <span>Stats</span>
+    </button>
+    <button class="nav-btn" data-view="settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- Change Goal Modal -->
+  <div id="modal-goal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Change goal</h2>
+      <p>Updates the target for your current fast.</p>
+      <div id="goal-modal-presets" class="goal-presets"></div>
+      <div class="custom-goal" style="margin-top:4px">
+        <label for="goal-modal-custom">Custom</label>
+        <input type="number" id="goal-modal-custom" min="1" max="168" placeholder="hours">
+        <button id="goal-modal-set" class="preset-btn">Set</button>
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button id="goal-modal-cancel" class="modal-btn secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdate Modal -->
+  <div id="modal-backdate" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>When did you start?</h2>
+      <p>Set the time your fast actually began.</p>
+      <input type="datetime-local" id="backdate-input" class="datetime-input">
+      <div class="modal-actions" style="margin-top:20px">
+        <button id="backdate-cancel" class="modal-btn secondary">Cancel</button>
+        <button id="backdate-confirm" class="modal-btn primary">Start Fast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Fast Modal -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>End fast?</h2>
+      <p id="modal-body"></p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="modal-btn secondary">Cancel</button>
+        <button id="modal-confirm" class="modal-btn primary">End Fast</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
