@@ -133,6 +133,30 @@ body {
   margin-top: 5px;
 }
 
+/* Goal selector (pre-fast, shown when no goal is set) */
+.goal-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.goal-select-prompt {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.goal-select .goal-presets {
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.goal-select .custom-goal {
+  justify-content: center;
+}
+
 /* Goal info pills */
 .goal-info {
   display: flex;

@@ -39,6 +39,16 @@
           <span id="time-remaining"></span>
         </div>
 
+        <div id="goal-select" class="goal-select hidden">
+          <p class="goal-select-prompt">Choose your fasting goal</p>
+          <div id="goal-select-presets" class="goal-presets"></div>
+          <div class="custom-goal">
+            <label for="goal-select-custom">Custom</label>
+            <input type="number" id="goal-select-custom" min="1" max="240" placeholder="hours">
+            <button id="goal-select-btn" class="preset-btn">Set</button>
+          </div>
+        </div>
+
         <button id="fast-toggle" class="fast-btn">Start Fast</button>
         <button id="backdate-btn" class="backdate-link">Started earlier?</button>
 
@@ -123,7 +133,7 @@
           <div id="goal-presets" class="goal-presets"></div>
           <div class="custom-goal">
             <label for="custom-hours">Custom</label>
-            <input type="number" id="custom-hours" min="1" max="168" placeholder="hours">
+            <input type="number" id="custom-hours" min="1" max="240" placeholder="hours">
             <button id="custom-goal-btn" class="preset-btn">Set</button>
           </div>
         </section>
@@ -203,7 +213,7 @@
       <div id="goal-modal-presets" class="goal-presets"></div>
       <div class="custom-goal" style="margin-top:4px">
         <label for="goal-modal-custom">Custom</label>
-        <input type="number" id="goal-modal-custom" min="1" max="168" placeholder="hours">
+        <input type="number" id="goal-modal-custom" min="1" max="240" placeholder="hours">
         <button id="goal-modal-set" class="preset-btn">Set</button>
       </div>
       <div class="modal-actions" style="margin-top:20px">

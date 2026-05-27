@@ -8,8 +8,8 @@ const Storage = {
   K: { active: 'fast_active', history: 'fast_history', settings: 'fast_settings', notes: 'fast_notes', weight: 'fast_weight' },
 
   getSettings() {
-    try { return { goalHours: 16, ...JSON.parse(localStorage.getItem(this.K.settings) || '{}') }; }
-    catch { return { goalHours: 16 }; }
+    try { return { goalHours: null, ...JSON.parse(localStorage.getItem(this.K.settings) || '{}') }; }
+    catch { return { goalHours: null }; }
   },
 
   saveSettings(s) { localStorage.setItem(this.K.settings, JSON.stringify(s)); },
@@ -156,6 +156,7 @@ let activeView = 'timer';
 
 function startFast(startTime = new Date()) {
   const { goalHours } = Storage.getSettings();
+  if (!goalHours) return;
   Storage.saveActive({ id: uid(), startTime: new Date(startTime).toISOString(), goalHours });
   renderTimer();
   tick();
@@ -230,38 +231,74 @@ function updateTimerDisplay() {
 // ── Render ────────────────────────────────────────────────────────────────────
 
 function renderTimer() {
-  const active = Storage.getActive();
+  const active   = Storage.getActive();
   const settings = Storage.getSettings();
 
-  const btn = document.getElementById('fast-toggle');
-  const backdateBtn = document.getElementById('backdate-btn');
-  const goalInfo = document.getElementById('goal-info');
-  const since = document.getElementById('fast-since');
-  const ring = document.getElementById('ring-progress');
-  const badge = document.getElementById('fast-status');
+  const btn          = document.getElementById('fast-toggle');
+  const backdateBtn  = document.getElementById('backdate-btn');
+  const goalInfo     = document.getElementById('goal-info');
+  const goalSelect   = document.getElementById('goal-select');
+  const ringWrap     = document.querySelector('.ring-container');
+  const since        = document.getElementById('fast-since');
+  const ring         = document.getElementById('ring-progress');
+  const badge        = document.getElementById('fast-status');
 
   if (active) {
+    ringWrap.classList.remove('hidden');
     btn.textContent = 'End Fast';
     btn.classList.add('ending');
+    btn.classList.remove('hidden');
     backdateBtn.classList.add('hidden');
     goalInfo.classList.remove('hidden');
+    goalSelect.classList.add('hidden');
     since.classList.remove('hidden');
     since.textContent = `Started ${fmtDateTime(active.startTime)}`;
     document.getElementById('goal-label').textContent = `Goal: ${fmtGoal(active.goalHours)} ✎`;
     tick();
   } else {
-    btn.textContent = 'Start Fast';
-    btn.classList.remove('ending');
-    backdateBtn.classList.remove('hidden');
-    goalInfo.classList.add('hidden');
     since.classList.add('hidden');
     document.getElementById('elapsed-time').textContent = '00:00:00';
+    document.getElementById('time-remaining').textContent = '';
     badge.textContent = 'Not fasting';
     badge.className = 'status-badge';
     ring.style.strokeDashoffset = CIRCUMFERENCE;
     ring.setAttribute('class', 'ring-progress');
     stopTicker();
+
+    if (settings.goalHours) {
+      ringWrap.classList.remove('hidden');
+      btn.textContent = 'Start Fast';
+      btn.classList.remove('ending');
+      btn.classList.remove('hidden');
+      backdateBtn.classList.remove('hidden');
+      goalInfo.classList.remove('hidden');
+      goalSelect.classList.add('hidden');
+      document.getElementById('goal-label').textContent = `Goal: ${fmtGoal(settings.goalHours)} ✎`;
+    } else {
+      ringWrap.classList.add('hidden');
+      btn.classList.add('hidden');
+      backdateBtn.classList.add('hidden');
+      goalInfo.classList.add('hidden');
+      goalSelect.classList.remove('hidden');
+      renderGoalSelector();
+    }
   }
+}
+
+function renderGoalSelector() {
+  const presets = [12, 14, 16, 18, 20, 24, 36, 48, 72, 96, 120];
+  const container = document.getElementById('goal-select-presets');
+  container.innerHTML = presets.map(h => `
+    <button class="preset-btn" data-hours="${h}">${fmtGoal(h)}</button>
+  `).join('');
+  container.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = Storage.getSettings();
+      s.goalHours = parseInt(btn.dataset.hours);
+      Storage.saveSettings(s);
+      renderTimer();
+    });
+  });
 }
 
 function renderHistory() {
@@ -381,7 +418,7 @@ function computeStreak(history) {
 function renderSettings() {
   const { goalHours } = Storage.getSettings();
   const container = document.getElementById('goal-presets');
-  const presets = [12, 14, 16, 18, 20, 24, 36, 48];
+  const presets = [12, 14, 16, 18, 20, 24, 36, 48, 72, 96, 120];
 
   container.innerHTML = presets.map(h => `
     <button class="preset-btn ${goalHours === h ? 'active' : ''}" data-hours="${h}">
@@ -561,13 +598,14 @@ function showView(name) {
 // ── Change goal modal ─────────────────────────────────────────────────────────
 
 function openGoalModal() {
-  const active = Storage.getActive();
-  if (!active) return;
+  const active       = Storage.getActive();
+  const settings     = Storage.getSettings();
+  const currentHours = active ? active.goalHours : settings.goalHours;
 
-  const presets = [12, 14, 16, 18, 20, 24, 36, 48];
+  const presets = [12, 14, 16, 18, 20, 24, 36, 48, 72, 96, 120];
   const container = document.getElementById('goal-modal-presets');
   container.innerHTML = presets.map(h => `
-    <button class="preset-btn ${active.goalHours === h ? 'active' : ''}" data-hours="${h}">
+    <button class="preset-btn ${currentHours === h ? 'active' : ''}" data-hours="${h}">
       ${fmtGoal(h)}
     </button>
   `).join('');
@@ -585,9 +623,17 @@ function closeGoalModal() {
 }
 
 function applyGoalChange(hours) {
-  Storage.updateActive({ goalHours: hours });
+  const active = Storage.getActive();
+  if (active) {
+    Storage.updateActive({ goalHours: hours });
+    updateTimerDisplay();
+  } else {
+    const s = Storage.getSettings();
+    s.goalHours = hours;
+    Storage.saveSettings(s);
+    renderTimer();
+  }
   document.getElementById('goal-label').textContent = `Goal: ${fmtGoal(hours)} ✎`;
-  updateTimerDisplay();
   closeGoalModal();
 }
 
@@ -658,7 +704,7 @@ function wireEvents() {
   });
   document.getElementById('goal-modal-set').addEventListener('click', () => {
     const h = parseInt(document.getElementById('goal-modal-custom').value);
-    if (!h || h < 1 || h > 168) { alert('Enter a number between 1 and 168.'); return; }
+    if (!h || h < 1 || h > 240) { alert('Enter a number between 1 and 240.'); return; }
     applyGoalChange(h);
   });
   document.getElementById('goal-modal-custom').addEventListener('keydown', e => {
@@ -691,10 +737,26 @@ function wireEvents() {
   });
 
   // Custom goal
+  // Goal selector on timer (pre-fast)
+  document.getElementById('goal-select-btn').addEventListener('click', () => {
+    const input = document.getElementById('goal-select-custom');
+    const h = parseInt(input.value);
+    if (!h || h < 1 || h > 240) { alert('Enter a number between 1 and 240.'); return; }
+    const s = Storage.getSettings();
+    s.goalHours = h;
+    Storage.saveSettings(s);
+    input.value = '';
+    renderTimer();
+  });
+  document.getElementById('goal-select-custom').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('goal-select-btn').click();
+  });
+
+  // Custom goal in settings
   document.getElementById('custom-goal-btn').addEventListener('click', () => {
     const input = document.getElementById('custom-hours');
     const h = parseInt(input.value);
-    if (!h || h < 1 || h > 168) { alert('Enter a number between 1 and 168.'); return; }
+    if (!h || h < 1 || h > 240) { alert('Enter a number between 1 and 240.'); return; }
     const s = Storage.getSettings();
     s.goalHours = h;
     Storage.saveSettings(s);
