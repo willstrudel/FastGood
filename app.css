@@ -643,26 +643,10 @@ body {
 
 .modal-btn.primary:hover { background: var(--accent-dim); }
 
-/* ── Weight section ── */
-.weight-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 24px 0 20px;
-}
-
-.weight-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.weight-section-title {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #a78bfa;
+/* ── Weight view ── */
+.weight-main {
+  padding: 12px 16px 16px;
+  flex: 1;
 }
 
 .unit-toggle {

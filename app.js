@@ -551,7 +551,8 @@ function showView(name) {
     case 'timer':    renderTimer();    break;
     case 'journal':  renderNotes();    break;
     case 'history':  renderHistory();  break;
-    case 'stats':    renderStats(); renderWeight(); break;
+    case 'stats':    renderStats();   break;
+    case 'weight':   renderWeight();  break;
     case 'settings': renderSettings(); break;
   }
 }

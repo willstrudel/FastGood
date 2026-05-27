@@ -86,25 +86,25 @@
         <div id="stats-empty" class="empty-state hidden">
           <p>Complete a fast to see stats.</p>
         </div>
+      </main>
+    </div>
 
-        <hr class="weight-divider">
-
-        <div class="weight-section-header">
-          <h2 class="weight-section-title">Weight</h2>
-          <div class="unit-toggle">
-            <button class="unit-btn" data-unit="lbs">lbs</button>
-            <button class="unit-btn" data-unit="kg">kg</button>
-          </div>
+    <!-- Weight View -->
+    <div id="view-weight" class="view">
+      <header class="view-header">
+        <h1>Weight</h1>
+        <div class="unit-toggle">
+          <button class="unit-btn" data-unit="lbs">lbs</button>
+          <button class="unit-btn" data-unit="kg">kg</button>
         </div>
-
+      </header>
+      <main class="weight-main">
         <div id="weight-summary"></div>
-
         <div class="weight-log-form">
           <input type="number" id="weight-input" step="0.1" min="0" max="999" placeholder="Weight">
           <input type="date" id="weight-date" class="weight-date-input">
           <button id="weight-log-btn" class="weight-log-btn">Log</button>
         </div>
-
         <div id="weight-list" class="weight-list"></div>
         <div id="weight-empty" class="empty-state hidden">
           <p>No weight entries yet.</p>
@@ -177,6 +177,14 @@
         <line x1="6" y1="20" x2="6" y2="14"/>
       </svg>
       <span>Stats</span>
+    </button>
+    <button class="nav-btn" data-view="weight" aria-label="Weight">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 20h18"/>
+        <path d="M5 20a7 7 0 0 1 14 0"/>
+        <path d="M12 13v4"/>
+      </svg>
+      <span>Weight</span>
     </button>
     <button class="nav-btn" data-view="settings" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
