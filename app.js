@@ -5,7 +5,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 110; // SVG ring r=110
 // ── Storage ──────────────────────────────────────────────────────────────────
 
 const Storage = {
-  K: { active: 'fast_active', history: 'fast_history', settings: 'fast_settings', notes: 'fast_notes' },
+  K: { active: 'fast_active', history: 'fast_history', settings: 'fast_settings', notes: 'fast_notes', weight: 'fast_weight' },
 
   getSettings() {
     try { return { goalHours: 16, ...JSON.parse(localStorage.getItem(this.K.settings) || '{}') }; }
@@ -56,6 +56,32 @@ const Storage = {
     localStorage.setItem(this.K.notes, JSON.stringify(notes));
   },
 
+  getWeight() {
+    try { return { unit: 'lbs', log: [], ...JSON.parse(localStorage.getItem(this.K.weight) || '{}') }; }
+    catch { return { unit: 'lbs', log: [] }; }
+  },
+
+  saveWeight(data) { localStorage.setItem(this.K.weight, JSON.stringify(data)); },
+
+  addWeightEntry(weight, date) {
+    const data = this.getWeight();
+    data.log.push({ id: uid(), weight, date, loggedAt: new Date().toISOString() });
+    data.log.sort((a, b) => a.date.localeCompare(b.date));
+    this.saveWeight(data);
+  },
+
+  deleteWeightEntry(id) {
+    const data = this.getWeight();
+    data.log = data.log.filter(e => e.id !== id);
+    this.saveWeight(data);
+  },
+
+  setWeightUnit(unit) {
+    const data = this.getWeight();
+    data.unit = unit;
+    this.saveWeight(data);
+  },
+
   clearAll() { Object.values(this.K).forEach(k => localStorage.removeItem(k)); },
 
   export() {
@@ -66,6 +92,7 @@ const Storage = {
       active: this.getActive(),
       history: this.getHistory(),
       notes: this.getNotes(),
+      weight: this.getWeight(),
     };
   },
 
@@ -75,6 +102,7 @@ const Storage = {
     if (data.active) this.saveActive(data.active);
     localStorage.setItem(this.K.history, JSON.stringify(data.history));
     if (Array.isArray(data.notes)) localStorage.setItem(this.K.notes, JSON.stringify(data.notes));
+    if (data.weight && Array.isArray(data.weight.log)) this.saveWeight(data.weight);
   },
 };
 
@@ -371,6 +399,97 @@ function renderSettings() {
   });
 }
 
+// ── Weight ────────────────────────────────────────────────────────────────────
+
+function renderWeight() {
+  const { unit, log } = Storage.getWeight();
+
+  document.querySelectorAll('.unit-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.unit === unit);
+  });
+
+  const dateInput = document.getElementById('weight-date');
+  if (!dateInput.value) dateInput.value = dateKey(new Date());
+
+  const summaryEl = document.getElementById('weight-summary');
+  const listEl    = document.getElementById('weight-list');
+  const emptyEl   = document.getElementById('weight-empty');
+
+  if (log.length === 0) {
+    summaryEl.innerHTML = '';
+    listEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  emptyEl.classList.add('hidden');
+
+  const first = log[0];
+  const last  = log[log.length - 1];
+  const delta = parseFloat((last.weight - first.weight).toFixed(1));
+  const deltaDisplay = Math.abs(delta);
+  const deltaClass   = delta < 0 ? 'weight-lost' : (delta > 0 ? 'weight-gained' : '');
+  const deltaLabel   = delta < 0 ? 'Total Lost' : (delta > 0 ? 'Total Gained' : 'No Change');
+
+  summaryEl.innerHTML = `
+    <div class="weight-summary-grid">
+      <div class="stat-card">
+        <div class="stat-value">${first.weight}</div>
+        <div class="stat-label">Starting (${unit})</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${last.weight}</div>
+        <div class="stat-label">Current (${unit})</div>
+      </div>
+      <div class="stat-card ${deltaClass}">
+        <div class="stat-value">${deltaDisplay}</div>
+        <div class="stat-label">${deltaLabel} (${unit})</div>
+      </div>
+    </div>
+  `;
+
+  const reversed = [...log].reverse();
+  listEl.innerHTML = reversed.map(entry => {
+    const chronIdx = log.findIndex(e => e.id === entry.id);
+    let deltaEl = '';
+    if (chronIdx > 0) {
+      const d = parseFloat((entry.weight - log[chronIdx - 1].weight).toFixed(1));
+      if (d !== 0) {
+        const arrow = d > 0 ? '↑' : '↓';
+        const color = d > 0 ? 'var(--danger)' : 'var(--success)';
+        deltaEl = `<span class="weight-delta" style="color:${color}">${arrow} ${Math.abs(d)}</span>`;
+      }
+    }
+    return `
+      <div class="weight-item" data-id="${entry.id}">
+        <div class="weight-item-info">
+          <span class="weight-item-date">${fmtDate(entry.date + 'T12:00:00')}</span>
+          ${deltaEl}
+        </div>
+        <span class="weight-item-value">${entry.weight} ${unit}</span>
+        <button class="delete-btn" aria-label="Delete entry">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const item = e.currentTarget.closest('.weight-item');
+      if (confirm('Delete this entry?')) {
+        Storage.deleteWeightEntry(item.dataset.id);
+        renderWeight();
+      }
+    });
+  });
+}
+
 // ── Journal ───────────────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
@@ -432,7 +551,7 @@ function showView(name) {
     case 'timer':    renderTimer();    break;
     case 'journal':  renderNotes();    break;
     case 'history':  renderHistory();  break;
-    case 'stats':    renderStats();    break;
+    case 'stats':    renderStats(); renderWeight(); break;
     case 'settings': renderSettings(); break;
   }
 }
@@ -616,6 +735,30 @@ function wireEvents() {
     };
     reader.readAsText(file);
     e.target.value = '';
+  });
+
+  // Weight
+  document.getElementById('weight-log-btn').addEventListener('click', () => {
+    const weightInput = document.getElementById('weight-input');
+    const dateInput   = document.getElementById('weight-date');
+    const w = parseFloat(weightInput.value);
+    const d = dateInput.value;
+    if (!w || w <= 0 || w > 999) { alert('Enter a valid weight.'); return; }
+    if (!d) { alert('Please pick a date.'); return; }
+    Storage.addWeightEntry(w, d);
+    weightInput.value = '';
+    renderWeight();
+  });
+
+  document.getElementById('weight-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('weight-log-btn').click();
+  });
+
+  document.querySelectorAll('.unit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      Storage.setWeightUnit(btn.dataset.unit);
+      renderWeight();
+    });
   });
 
   // Clear all

@@ -86,6 +86,29 @@
         <div id="stats-empty" class="empty-state hidden">
           <p>Complete a fast to see stats.</p>
         </div>
+
+        <hr class="weight-divider">
+
+        <div class="weight-section-header">
+          <h2 class="weight-section-title">Weight</h2>
+          <div class="unit-toggle">
+            <button class="unit-btn" data-unit="lbs">lbs</button>
+            <button class="unit-btn" data-unit="kg">kg</button>
+          </div>
+        </div>
+
+        <div id="weight-summary"></div>
+
+        <div class="weight-log-form">
+          <input type="number" id="weight-input" step="0.1" min="0" max="999" placeholder="Weight">
+          <input type="date" id="weight-date" class="weight-date-input">
+          <button id="weight-log-btn" class="weight-log-btn">Log</button>
+        </div>
+
+        <div id="weight-list" class="weight-list"></div>
+        <div id="weight-empty" class="empty-state hidden">
+          <p>No weight entries yet.</p>
+        </div>
       </main>
     </div>
 
