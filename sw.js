@@ -1,4 +1,4 @@
-const CACHE = 'fast-v11';
+const CACHE = 'fast-v12';
 const FILES = ['./', './index.html', './app.css', './app.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {

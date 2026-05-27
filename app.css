@@ -252,6 +252,91 @@ body {
 .status-badge.fasting  { background: rgba(16,185,129,.12); color: var(--success); border-color: rgba(16,185,129,.3); }
 .status-badge.goal-met { background: rgba(16,185,129,.12); color: var(--success); border-color: rgba(16,185,129,.3); }
 
+/* ── Journal view ── */
+.journal-main {
+  padding: 12px 16px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.note-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+
+.note-composer textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  color-scheme: dark;
+}
+
+.note-composer textarea:focus { border-color: #a78bfa; }
+.note-composer textarea::placeholder { color: var(--text-muted); }
+
+.note-add-btn {
+  align-self: flex-end;
+  padding: 10px 22px;
+  background: #a78bfa;
+  color: #0f1117;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.note-add-btn:hover { background: #8b5cf6; }
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  color: #a78bfa;
+}
+
+.note-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 /* ── History view ── */
 .history-main {
   padding: 12px 16px 16px;
@@ -489,7 +574,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.nav-btn svg { width: 22px; height: 22px; }
+.nav-btn svg { width: 20px; height: 20px; }
 .nav-btn.active { color: #a78bfa; }
 
 /* ── Modal ── */

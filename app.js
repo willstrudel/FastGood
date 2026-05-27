@@ -5,7 +5,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 110; // SVG ring r=110
 // ── Storage ──────────────────────────────────────────────────────────────────
 
 const Storage = {
-  K: { active: 'fast_active', history: 'fast_history', settings: 'fast_settings' },
+  K: { active: 'fast_active', history: 'fast_history', settings: 'fast_settings', notes: 'fast_notes' },
 
   getSettings() {
     try { return { goalHours: 16, ...JSON.parse(localStorage.getItem(this.K.settings) || '{}') }; }
@@ -42,6 +42,20 @@ const Storage = {
     localStorage.setItem(this.K.history, JSON.stringify(h));
   },
 
+  getNotes() {
+    try { return JSON.parse(localStorage.getItem(this.K.notes) || '[]'); }
+    catch { return []; }
+  },
+  addNote(text) {
+    const notes = this.getNotes();
+    notes.unshift({ id: uid(), text, createdAt: new Date().toISOString() });
+    localStorage.setItem(this.K.notes, JSON.stringify(notes));
+  },
+  deleteNote(id) {
+    const notes = this.getNotes().filter(n => n.id !== id);
+    localStorage.setItem(this.K.notes, JSON.stringify(notes));
+  },
+
   clearAll() { Object.values(this.K).forEach(k => localStorage.removeItem(k)); },
 
   export() {
@@ -51,6 +65,7 @@ const Storage = {
       settings: this.getSettings(),
       active: this.getActive(),
       history: this.getHistory(),
+      notes: this.getNotes(),
     };
   },
 
@@ -59,6 +74,7 @@ const Storage = {
     if (data.settings) this.saveSettings(data.settings);
     if (data.active) this.saveActive(data.active);
     localStorage.setItem(this.K.history, JSON.stringify(data.history));
+    if (Array.isArray(data.notes)) localStorage.setItem(this.K.notes, JSON.stringify(data.notes));
   },
 };
 
@@ -355,6 +371,52 @@ function renderSettings() {
   });
 }
 
+// ── Journal ───────────────────────────────────────────────────────────────────
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderNotes() {
+  const notes = Storage.getNotes();
+  const list = document.getElementById('notes-list');
+  const empty = document.getElementById('notes-empty');
+
+  if (notes.length === 0) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  empty.classList.add('hidden');
+  list.innerHTML = notes.map(n => `
+    <div class="note-item" data-id="${n.id}">
+      <div class="note-header">
+        <span class="note-date">${fmtDateTime(n.createdAt)}</span>
+        <button class="delete-btn" aria-label="Delete note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="note-text">${escapeHtml(n.text)}</div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const item = e.currentTarget.closest('.note-item');
+      if (confirm('Delete this note?')) {
+        Storage.deleteNote(item.dataset.id);
+        renderNotes();
+      }
+    });
+  });
+}
+
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 function showView(name) {
@@ -368,6 +430,7 @@ function showView(name) {
 
   switch (name) {
     case 'timer':    renderTimer();    break;
+    case 'journal':  renderNotes();    break;
     case 'history':  renderHistory();  break;
     case 'stats':    renderStats();    break;
     case 'settings': renderSettings(); break;
@@ -449,6 +512,21 @@ function wireEvents() {
   document.getElementById('fast-toggle').addEventListener('click', () => {
     if (Storage.getActive()) openModal();
     else startFast();
+  });
+
+  // Journal
+  document.getElementById('note-add-btn').addEventListener('click', () => {
+    const input = document.getElementById('note-input');
+    const text = input.value.trim();
+    if (!text) return;
+    Storage.addNote(text);
+    input.value = '';
+    renderNotes();
+  });
+  document.getElementById('note-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      document.getElementById('note-add-btn').click();
+    }
   });
 
   // Change goal
