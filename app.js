@@ -540,6 +540,7 @@ function renderNotes() {
 
 function showView(name) {
   activeView = name;
+  localStorage.setItem('fast_view', name);
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -784,5 +785,7 @@ function registerSW() {
 document.addEventListener('DOMContentLoaded', () => {
   registerSW();
   wireEvents();
-  showView('timer');
+  const VIEWS = ['timer', 'journal', 'history', 'stats', 'weight', 'settings'];
+  const saved = localStorage.getItem('fast_view');
+  showView(VIEWS.includes(saved) ? saved : 'timer');
 });

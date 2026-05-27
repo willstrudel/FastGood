@@ -1,4 +1,4 @@
-const CACHE = 'fast-v16';
+const CACHE = 'fast-v17';
 const FILES = ['./', './index.html', './app.css', './app.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
@@ -17,26 +17,15 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Network-first for everything: always serve fresh files, fall back to cache offline
 self.addEventListener('fetch', e => {
-  // Network-first for page navigation — HTML always fetched fresh so deploys take effect on F5
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request))
-    );
-    return;
-  }
-  // Cache-first for static assets (CSS, JS, images)
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-      const clone = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
-      return res;
-    }))
+    fetch(e.request)
+      .then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
