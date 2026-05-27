@@ -168,7 +168,7 @@ body {
 /* Primary action button */
 .fast-btn {
   width: 100%;
-  max-width: 320px;
+  max-width: 220px;
   padding: 18px;
   border: none;
   border-radius: 14px;
@@ -197,8 +197,9 @@ body {
 .backdate-link {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: #a78bfa;
   font-size: 0.82rem;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   text-decoration: underline;
@@ -209,7 +210,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.backdate-link:hover { color: var(--text); }
+.backdate-link:hover { color: #8b5cf6; }
 
 /* Datetime input in modal */
 .datetime-input {
@@ -242,9 +243,9 @@ body {
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 12px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: rgba(239,68,68,.12);
+  color: var(--danger);
+  border: 1px solid rgba(239,68,68,.3);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
