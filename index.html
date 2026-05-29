@@ -41,9 +41,23 @@
 
         <div id="goal-select" class="goal-select hidden">
           <p class="goal-select-prompt">Choose your fasting goal</p>
-          <div id="goal-select-presets" class="goal-presets"></div>
-          <div class="custom-goal">
-            <label for="goal-select-custom">Custom</label>
+          <select id="goal-select-dropdown" class="goal-dropdown">
+            <option value="" disabled selected>Select a goal...</option>
+            <option value="12">12 hours</option>
+            <option value="14">14 hours</option>
+            <option value="16">16 hours</option>
+            <option value="18">18 hours</option>
+            <option value="20">20 hours</option>
+            <option value="24">1 day (24h)</option>
+            <option value="36">36 hours</option>
+            <option value="48">2 days (48h)</option>
+            <option value="72">3 days (72h)</option>
+            <option value="96">4 days (96h)</option>
+            <option value="120">5 days (120h)</option>
+            <option value="custom">Custom...</option>
+          </select>
+          <div id="goal-select-custom-row" class="custom-goal hidden">
+            <label for="goal-select-custom">Hours</label>
             <input type="number" id="goal-select-custom" min="1" max="240" placeholder="hours">
             <button id="goal-select-btn" class="preset-btn">Set</button>
           </div>
@@ -231,6 +245,41 @@
       <div class="modal-actions" style="margin-top:20px">
         <button id="backdate-cancel" class="modal-btn secondary">Cancel</button>
         <button id="backdate-confirm" class="modal-btn primary">Start Fast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Fast Modal -->
+  <div id="modal-edit-fast" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Edit fast</h2>
+      <div class="edit-fast-fields">
+        <label for="edit-start">Started</label>
+        <input type="datetime-local" id="edit-start" class="datetime-input">
+        <label for="edit-end">Ended</label>
+        <input type="datetime-local" id="edit-end" class="datetime-input">
+        <label for="edit-goal">Goal</label>
+        <select id="edit-goal" class="goal-dropdown">
+          <option value="12">12 hours</option>
+          <option value="14">14 hours</option>
+          <option value="16">16 hours</option>
+          <option value="18">18 hours</option>
+          <option value="20">20 hours</option>
+          <option value="24">1 day (24h)</option>
+          <option value="36">36 hours</option>
+          <option value="48">2 days (48h)</option>
+          <option value="72">3 days (72h)</option>
+          <option value="96">4 days (96h)</option>
+          <option value="120">5 days (120h)</option>
+          <option value="custom">Custom...</option>
+        </select>
+        <div id="edit-goal-custom-row" class="hidden">
+          <input type="number" id="edit-goal-custom" class="datetime-input" min="1" max="240" placeholder="Custom hours">
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button id="edit-fast-cancel" class="modal-btn secondary">Cancel</button>
+        <button id="edit-fast-confirm" class="modal-btn primary">Save</button>
       </div>
     </div>
   </div>

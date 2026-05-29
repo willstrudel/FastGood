@@ -78,8 +78,16 @@ const Storage = {
 
   setWeightUnit(unit) {
     const data = this.getWeight();
+    if (data.unit === unit) return;
+    const factor = unit === 'kg' ? 0.453592 : 2.20462;
+    data.log = data.log.map(e => ({ ...e, weight: parseFloat((e.weight * factor).toFixed(1)) }));
     data.unit = unit;
     this.saveWeight(data);
+  },
+
+  updateHistoryEntry(id, changes) {
+    const h = this.getHistory().map(e => e.id === id ? { ...e, ...changes } : e);
+    localStorage.setItem(this.K.history, JSON.stringify(h));
   },
 
   clearAll() { Object.values(this.K).forEach(k => localStorage.removeItem(k)); },
@@ -153,6 +161,7 @@ function dateKey(d) {
 
 let ticker = null;
 let activeView = 'timer';
+let editingFastId = null;
 
 function startFast(startTime = new Date()) {
   const { goalHours } = Storage.getSettings();
@@ -234,17 +243,15 @@ function renderTimer() {
   const active   = Storage.getActive();
   const settings = Storage.getSettings();
 
-  const btn          = document.getElementById('fast-toggle');
-  const backdateBtn  = document.getElementById('backdate-btn');
-  const goalInfo     = document.getElementById('goal-info');
-  const goalSelect   = document.getElementById('goal-select');
-  const ringWrap     = document.querySelector('.ring-container');
-  const since        = document.getElementById('fast-since');
-  const ring         = document.getElementById('ring-progress');
-  const badge        = document.getElementById('fast-status');
+  const btn         = document.getElementById('fast-toggle');
+  const backdateBtn = document.getElementById('backdate-btn');
+  const goalInfo    = document.getElementById('goal-info');
+  const goalSelect  = document.getElementById('goal-select');
+  const since       = document.getElementById('fast-since');
+  const ring        = document.getElementById('ring-progress');
+  const badge       = document.getElementById('fast-status');
 
   if (active) {
-    ringWrap.classList.remove('hidden');
     btn.textContent = 'End Fast';
     btn.classList.add('ending');
     btn.classList.remove('hidden');
@@ -266,7 +273,6 @@ function renderTimer() {
     stopTicker();
 
     if (settings.goalHours) {
-      ringWrap.classList.remove('hidden');
       btn.textContent = 'Start Fast';
       btn.classList.remove('ending');
       btn.classList.remove('hidden');
@@ -275,30 +281,14 @@ function renderTimer() {
       goalSelect.classList.add('hidden');
       document.getElementById('goal-label').textContent = `Goal: ${fmtGoal(settings.goalHours)} ✎`;
     } else {
-      ringWrap.classList.add('hidden');
       btn.classList.add('hidden');
       backdateBtn.classList.add('hidden');
       goalInfo.classList.add('hidden');
       goalSelect.classList.remove('hidden');
-      renderGoalSelector();
+      document.getElementById('goal-select-dropdown').value = '';
+      document.getElementById('goal-select-custom-row').classList.add('hidden');
     }
   }
-}
-
-function renderGoalSelector() {
-  const presets = [12, 14, 16, 18, 20, 24, 36, 48, 72, 96, 120];
-  const container = document.getElementById('goal-select-presets');
-  container.innerHTML = presets.map(h => `
-    <button class="preset-btn" data-hours="${h}">${fmtGoal(h)}</button>
-  `).join('');
-  container.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const s = Storage.getSettings();
-      s.goalHours = parseInt(btn.dataset.hours);
-      Storage.saveSettings(s);
-      renderTimer();
-    });
-  });
 }
 
 function renderHistory() {
@@ -321,9 +311,16 @@ function renderHistory() {
         <div class="item-meta">${fmtDate(e.startTime)} &middot; ${e.goalMet ? 'Goal met' : 'Goal: ' + fmtGoal(e.goalHours)}</div>
         <div class="item-meta">${fmtDateTime(e.startTime)} &rarr; ${fmtDateTime(e.endTime)}</div>
       </div>
+      <button class="edit-btn" aria-label="Edit fast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
       <button class="delete-btn" aria-label="Delete fast">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
           <path d="M10 11v6M14 11v6"/>
@@ -332,6 +329,12 @@ function renderHistory() {
       </button>
     </div>
   `).join('');
+
+  list.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      openEditFastModal(e.currentTarget.closest('.history-item').dataset.id);
+    });
+  });
 
   list.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -637,6 +640,40 @@ function applyGoalChange(hours) {
   closeGoalModal();
 }
 
+// ── Edit fast modal ───────────────────────────────────────────────────────────
+
+const EDIT_GOAL_PRESETS = [12, 14, 16, 18, 20, 24, 36, 48, 72, 96, 120];
+
+function openEditFastModal(id) {
+  const entry = Storage.getHistory().find(e => e.id === id);
+  if (!entry) return;
+  editingFastId = id;
+
+  const toLocal = iso => {
+    const d = new Date(iso);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+  document.getElementById('edit-start').value = toLocal(entry.startTime);
+  document.getElementById('edit-end').value   = toLocal(entry.endTime);
+
+  const sel = document.getElementById('edit-goal');
+  if (EDIT_GOAL_PRESETS.includes(entry.goalHours)) {
+    sel.value = String(entry.goalHours);
+    document.getElementById('edit-goal-custom-row').classList.add('hidden');
+  } else {
+    sel.value = 'custom';
+    document.getElementById('edit-goal-custom').value = entry.goalHours;
+    document.getElementById('edit-goal-custom-row').classList.remove('hidden');
+  }
+
+  document.getElementById('modal-edit-fast').classList.remove('hidden');
+}
+
+function closeEditFastModal() {
+  document.getElementById('modal-edit-fast').classList.add('hidden');
+  editingFastId = null;
+}
+
 // ── Backdate modal ────────────────────────────────────────────────────────────
 
 function openBackdateModal() {
@@ -736,8 +773,20 @@ function wireEvents() {
     if (e.target === e.currentTarget) closeModal();
   });
 
-  // Custom goal
-  // Goal selector on timer (pre-fast)
+  // Goal selector dropdown (timer, pre-fast)
+  document.getElementById('goal-select-dropdown').addEventListener('change', e => {
+    const val = e.target.value;
+    if (val === 'custom') {
+      document.getElementById('goal-select-custom-row').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('goal-select-custom-row').classList.add('hidden');
+    if (!val) return;
+    const s = Storage.getSettings();
+    s.goalHours = parseInt(val);
+    Storage.saveSettings(s);
+    renderTimer();
+  });
   document.getElementById('goal-select-btn').addEventListener('click', () => {
     const input = document.getElementById('goal-select-custom');
     const h = parseInt(input.value);
@@ -750,6 +799,42 @@ function wireEvents() {
   });
   document.getElementById('goal-select-custom').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('goal-select-btn').click();
+  });
+
+  // Edit fast modal
+  document.getElementById('edit-fast-cancel').addEventListener('click', closeEditFastModal);
+  document.getElementById('modal-edit-fast').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeEditFastModal();
+  });
+  document.getElementById('edit-goal').addEventListener('change', e => {
+    document.getElementById('edit-goal-custom-row').classList.toggle('hidden', e.target.value !== 'custom');
+  });
+  document.getElementById('edit-fast-confirm').addEventListener('click', () => {
+    if (!editingFastId) return;
+    const startVal = document.getElementById('edit-start').value;
+    const endVal   = document.getElementById('edit-end').value;
+    const goalSel  = document.getElementById('edit-goal').value;
+    if (!startVal || !endVal) { alert('Start and end times are required.'); return; }
+    const startTime = new Date(startVal);
+    const endTime   = new Date(endVal);
+    if (endTime <= startTime) { alert('End time must be after start time.'); return; }
+    let goalHours;
+    if (goalSel === 'custom') {
+      goalHours = parseInt(document.getElementById('edit-goal-custom').value);
+      if (!goalHours || goalHours < 1 || goalHours > 240) { alert('Enter a valid custom goal.'); return; }
+    } else {
+      goalHours = parseInt(goalSel);
+    }
+    const duration = endTime.getTime() - startTime.getTime();
+    Storage.updateHistoryEntry(editingFastId, {
+      startTime: startTime.toISOString(),
+      endTime:   endTime.toISOString(),
+      duration,
+      goalHours,
+      goalMet: duration >= goalHours * 3_600_000,
+    });
+    closeEditFastModal();
+    renderHistory();
   });
 
   // Custom goal in settings
